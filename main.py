@@ -80,6 +80,7 @@ def handle_text_message(event):
 
     if status == 'suspend':
       if text =='開始':
+          TextSendMessage("1")
         playerdict = []
         playerIDs_SO = []
         playerIDs_DO = []
