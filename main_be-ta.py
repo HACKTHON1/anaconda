@@ -18,29 +18,29 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 import time
 
-playerdict = {}   #playerID(user_id)とPlayerインスタンスの紐付け
 
-playerIDs_SO = []   #ShuffleされたplayerIDs
-
-playerIDs_DO =[]    #参加順のplayerIDs
-
-actedNum = 0    #status中で行動を終えたプレイヤーの数
-
-themes1 = ['a','b','c','d','e']
-
-themes2 = ['f','g','h','i','j']
-
-status = 'suspend'
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    phase = db.Column(db.String(80), unique=True)
-    player = db.Column(db.String(120), unique=True)
-    roomact = db.Column(db.Integer, unique=True)
+    phase = db.Column(db.String(80))
+    player = db.Column(db.Integer)
+    roomact = db.Column(db.Integer)
     def __init__(self, phase, player, roomact):
         self.phase = phase
         self.player = player
         self.roomact = roomact
 
+class player(db.Model):
+    playerid = db.Column(db.String(80), primary_key=True)
+    playername = db.Column(db.String(80), unique=True)
+    answer = db.Column(db.String(160), unique=True)
+    playeract = db.Column(db.Integer)
+    vote = db.Column(db.Integer)
+
+    def __init__(self, playeract, vote):
+        self.playeract=playeract
+        self.vote=vote
+
+'''
 def question(num):
         text ='お題は「%s × %s」です。'%(
           themes1[random.randint(0, len(themes1)-1)], 
@@ -52,7 +52,8 @@ def question(num):
         TextSendMessage(text)
         global actedNum
         actedNum+=1
-
+'''
+'''
 def createConfirm():
   confirm_temprate_message = TemplateSendMessage(
       alt_text='Confirm template',
@@ -70,7 +71,7 @@ def createConfirm():
           ]
       )
   )
-
+'''
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -88,11 +89,6 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
-  global playerdict
-  global playerIDs_SO
-  global playerIDs_DO
-  global actedNum
-  global status
   text = event.message.text
   profile = line_bot_api.get_profile(event.source.user_id)
 
@@ -162,10 +158,6 @@ def handle_text_message(event):
 
   @handler.add(PostbackEvent)
   def on_postback(event):
-    global status
-    global playerIDs_SO
-    global playerIDs_DO
-    global playerdict
 
     if status == 'inviting':
       profile = line_bot_api.get_profile(event.source.user_id)
